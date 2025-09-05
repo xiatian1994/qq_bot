@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>用户游戏信息</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stats-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .title-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .stats-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 3px solid #007bff;
+            position: absolute;
+            left: 20px;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+        }
+
+        .games-section {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .game-stats {
+            flex: 1;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #dee2e6;
+        }
+
+        .game-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .ttt-stats {
+            border-color: #e74c3c;
+        }
+
+        .ttt-stats .game-title {
+            color: #e74c3c;
+        }
+
+        .gomoku-stats {
+            border-color: #3498db;
+        }
+
+        .gomoku-stats .game-title {
+            color: #3498db;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .stat-label {
+            color: #666;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .win-rate {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .no-data {
+            color: #999;
+            font-style: italic;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="stats-container">
+    <div class="title-section">
+        {% if user_id != 'AI' %}
+        <img alt="用户头像"
+             class="user-avatar" src="https://q.qlogo.cn/qqapp/{{ bot_app_id }}/{{ user_id }}/640">
+        {% endif %}
+        <div class="stats-title">🎮 游戏信息</div>
+    </div>
+
+    <div class="games-section">
+        <!-- 井字棋统计 -->
+        <div class="game-stats ttt-stats">
+            <div class="game-title">🎯 井字棋</div>
+            {% if ttt_stats.total_games > 0 %}
+            <div class="win-rate">{{ ttt_stats.win_rate }}%</div>
+            <div class="stat-item">
+                <span class="stat-label">总局数</span>
+                <span class="stat-value">{{ ttt_stats.total_games }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">胜负平</span>
+                <span class="stat-value">{{ ttt_stats.wins }}/{{ ttt_stats.losses }}/{{ ttt_stats.draws }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">最佳连胜</span>
+                <span class="stat-value">{{ ttt_stats.best_streak }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">当前连胜</span>
+                <span class="stat-value">{{ ttt_stats.current_streak }}</span>
+            </div>
+            {% else %}
+            <div class="no-data">暂无游戏记录</div>
+            {% endif %}
+        </div>
+
+        <!-- 五子棋统计 -->
+        <div class="game-stats gomoku-stats">
+            <div class="game-title">🎲 五子棋</div>
+            {% if gomoku_stats.total_games > 0 %}
+            <div class="win-rate">{{ gomoku_stats.win_rate }}%</div>
+            <div class="stat-item">
+                <span class="stat-label">总局数</span>
+                <span class="stat-value">{{ gomoku_stats.total_games }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">胜负平</span>
+                <span class="stat-value">{{ gomoku_stats.wins }}/{{ gomoku_stats.losses }}/{{ gomoku_stats.draws }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">最佳连胜</span>
+                <span class="stat-value">{{ gomoku_stats.best_streak }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">当前连胜</span>
+                <span class="stat-value">{{ gomoku_stats.current_streak }}</span>
+            </div>
+            {% else %}
+            <div class="no-data">暂无游戏记录</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</body>
+</html>

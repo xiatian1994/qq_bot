@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>五子棋棋盘</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 700px;
+        }
+
+        .title-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .game-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .title-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 3px solid #ddd;
+            position: absolute;
+        }
+
+        .title-avatar.left {
+            left: 20px;
+        }
+
+        .title-avatar.right {
+            right: 20px;
+        }
+
+        .title-avatar.current {
+            border-color: #007bff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+        }
+
+        .players-info {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+
+        .player {
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+        }
+
+        .player.current {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+        }
+
+        .board-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #DEB887;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 20px auto;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .coord-col {
+            display: flex;
+            flex-direction: column;
+            height: 420px;
+            margin: 0 15px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #8B4513;
+            position: relative;
+        }
+
+        .coord-col.left {
+            margin-left: 25px;
+            margin-right: 15px;
+        }
+
+        .coord-col.right {
+            margin-left: 15px;
+            margin-right: 25px;
+        }
+
+        .coord-col span {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+        }
+
+        .board-with-coords {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .coord-row {
+            position: relative;
+            width: 420px;
+            height: 20px;
+            margin: 15px 0;
+            font-size: 14px;
+            font-weight: bold;
+            color: #8B4513;
+        }
+
+        .coord-row span {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+        }
+
+        .board {
+            position: relative;
+            width: 420px;
+            height: 420px;
+            background: #DEB887;
+        }
+
+        .grid-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 420px;
+            height: 420px;
+            pointer-events: none;
+        }
+
+        .star-point {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #8B4513;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .winning-line {
+            position: absolute;
+            background: #ff0000;
+            height: 6px;
+            border-radius: 3px;
+            pointer-events: none;
+            z-index: 10;
+            box-shadow: 0 0 15px #ff0000;
+        }
+
+
+        .intersection {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 50%;
+
+            /* 居中在交叉点上 */
+            transform: translate(-50%, -50%);
+        }
+
+        .intersection:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .intersection.black {
+            color: #000;
+        }
+
+        .intersection.white {
+            color: #fff;
+        }
+
+        .intersection.last-move {
+            box-shadow: 0 0 15px rgba(255, 235, 59, 1), 0 0 0 3px #FFC107;
+            border-radius: 50%;
+        }
+
+
+        .status {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .status.playing {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status.win {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .status.draw {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+            flex-wrap: wrap;
+        }
+
+        .game-info > div {
+            margin: 5px;
+        }
+
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="title-section">
+        <!-- 左侧头像 (黑棋玩家) -->
+        {% if player1_id != 'AI' %}
+        <img alt="黑棋玩家头像"
+             class="title-avatar left {% if current_player == player1_id %}current{% endif %}"
+             src="https://q.qlogo.cn/qqapp/{{ bot_app_id }}/{{ player1_id }}/640">
+        {% endif %}
+
+        <div class="game-title">🎮 五子棋</div>
+
+        <!-- 右侧头像 (白棋玩家) -->
+        {% if player2_id != 'AI' %}
+        <img alt="白棋玩家头像"
+             class="title-avatar right {% if current_player == player2_id %}current{% endif %}"
+             src="https://q.qlogo.cn/qqapp/{{ bot_app_id }}/{{ player2_id }}/640">
+        {% endif %}
+    </div>
+
+    <div class="players-info">
+        <div class="player {% if current_player == player1_id %}current{% endif %}">
+            <span>● {% if player1_id == 'AI' %}AI{% else %}玩家{% endif %}</span>
+        </div>
+        <div class="player {% if current_player == player2_id %}current{% endif %}">
+            <span>○ {% if player2_id == 'AI' %}AI{% else %}玩家{% endif %}</span>
+        </div>
+    </div>
+
+    <div class="board-container">
+        <!-- 左侧坐标列 - 显示行号1-15 -->
+        <div class="coord-col left">
+            {% for i in range(15) %}
+            <span style="top: {{ i * 30 - 10 }}px; left: -15px;">{{ i + 1 }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="board-with-coords">
+            <!-- 顶部坐标行 - 显示列标A-O -->
+            <div class="coord-row">
+                {% for i in range(15) %}
+                <span style="left: {{ i * 30 - 10 }}px; top: -5px;">{{ 'ABCDEFGHIJKLMNO'[i] }}</span>
+                {% endfor %}
+            </div>
+
+            <!-- 棋盘 -->
+            <div class="board">
+                <!-- SVG网格线 -->
+                <svg class="grid-svg">
+                    <!-- 水平线 - 15条 -->
+                    {% for i in range(15) %}
+                    <line stroke="#8B4513" stroke-width="1" x1="0" x2="420" y1="{{ i * 30 }}" y2="{{ i * 30 }}"/>
+                    {% endfor %}
+                    <!-- 垂直线 - 15条 -->
+                    {% for i in range(15) %}
+                    <line stroke="#8B4513" stroke-width="1" x1="{{ i * 30 }}" x2="{{ i * 30 }}" y1="0" y2="420"/>
+                    {% endfor %}
+                </svg>
+
+                <!-- 星位标记 -->
+                <!-- 天元 (中心点) -->
+                <div class="star-point" style="left: 210px; top: 210px;"></div>
+
+                <!-- 四个角星 -->
+                <div class="star-point" style="left: 90px; top: 90px;"></div>
+                <div class="star-point" style="left: 330px; top: 90px;"></div>
+                <div class="star-point" style="left: 90px; top: 330px;"></div>
+                <div class="star-point" style="left: 330px; top: 330px;"></div>
+
+                <!-- 四个边星 -->
+                <div class="star-point" style="left: 90px; top: 210px;"></div>
+                <div class="star-point" style="left: 210px; top: 90px;"></div>
+                <div class="star-point" style="left: 330px; top: 210px;"></div>
+                <div class="star-point" style="left: 210px; top: 330px;"></div>
+
+                <!-- 棋子 - 精确落在交叉点上 -->
+                {% for i in range(15) %}
+                {% for j in range(15) %}
+                {% set cell_value = board[i][j] %}
+                {% set is_last = last_move and last_move[0] == i and last_move[1] == j %}
+                {% if cell_value != 0 %}
+                <div class="intersection
+                                    {% if cell_value == 1 %}black
+                                    {% elif cell_value == 2 %}white
+                                    {% endif %}
+                                    {% if is_last %}last-move{% endif %}"
+                     style="left: {{ j * 30 }}px; top: {{ i * 30 }}px;">
+                    {% if cell_value == 1 %}●
+                    {% elif cell_value == 2 %}●
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% endfor %}
+
+                <!-- 获胜线 -->
+                {% if winning_line and winning_line|length >= 2 %}
+                {% set start_pos = winning_line[0] %}
+                {% set end_pos = winning_line[-1] %}
+                {% set start_x = start_pos[1] * 30 %}
+                {% set start_y = start_pos[0] * 30 %}
+                {% set end_x = end_pos[1] * 30 %}
+                {% set end_y = end_pos[0] * 30 %}
+                {% set dx = end_x - start_x %}
+                {% set dy = end_y - start_y %}
+
+                {% if dx == 0 %}
+                <!-- 垂直线 -->
+                <div class="winning-line"
+                     style="left: {{ start_x - 3 }}px;
+                                        top: {{ start_y }}px;
+                                        width: 6px;
+                                        height: {{ dy|abs }}px;">
+                </div>
+                {% elif dy == 0 %}
+                <!-- 水平线 -->
+                <div class="winning-line"
+                     style="left: {{ start_x }}px;
+                                        top: {{ start_y - 3 }}px;
+                                        width: {{ dx|abs }}px;
+                                        height: 6px;">
+                </div>
+                {% elif dx|abs == dy|abs %}
+                <!-- 对角线 -->
+                {% set length = ((dx * dx + dy * dy) ** 0.5)|round %}
+                {% set angle = 45 if dx * dy > 0 else -45 %}
+                <div class="winning-line"
+                     style="left: {{ start_x }}px;
+                                        top: {{ start_y }}px;
+                                        width: {{ length }}px;
+                                        height: 6px;
+                                        transform-origin: 0 50%;
+                                        transform: rotate({{ angle }}deg);">
+                </div>
+                {% endif %}
+                {% endif %}
+            </div>
+
+            <!-- 底部坐标行 - 显示列标A-O -->
+            <div class="coord-row">
+                {% for i in range(15) %}
+                <span style="left: {{ i * 30 - 10 }}px; bottom: -5px;">{{ 'ABCDEFGHIJKLMNO'[i] }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 右侧坐标列 - 显示行号1-15 -->
+        <div class="coord-col right">
+            {% for i in range(15) %}
+            <span style="top: {{ i * 30 - 10 }}px; right: -15px;">{{ i + 1 }}</span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="status {% if is_finished %}{% if winner %}win{% else %}draw{% endif %}{% else %}playing{% endif %}">
+        {% if is_finished %}
+        {% if winner %}
+        🎉 游戏结束！{{ winner_name }} 获胜！
+        {% else %}
+        🤝 游戏平局！
+        {% endif %}
+        {% else %}
+        🎯 轮到 {% if current_player == player1_id %}●{% else %}○{% endif %} 下棋
+        {% endif %}
+    </div>
+
+    <div class="game-info">
+        <div>🎲 步数: {{ moves_count }}</div>
+        <div>⏱️ 游戏时间: {{ game_duration or '进行中' }}</div>
+        {% if last_move %}
+        <div>📍 最后一步: 第{{ last_move[0] + 1 }}行第{{ last_move[1] + 1 }}列</div>
+        {% endif %}
+        {% if not is_finished %}
+        <div>💡 使用 <code>f &lt;坐标&gt;</code> 命令下棋（如：f H8）</div>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>群组排行榜</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ranking-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .ranking-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .games-section {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .game-ranking {
+            flex: 1;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            border: 3px solid #dee2e6;
+        }
+
+        .game-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #495057;
+        }
+
+        .ttt-ranking {
+            border-color: #e74c3c;
+        }
+
+        .ttt-ranking .game-title {
+            color: #e74c3c;
+        }
+
+        .gomoku-ranking {
+            border-color: #3498db;
+        }
+
+        .gomoku-ranking .game-title {
+            color: #3498db;
+        }
+
+        .ranking-list {
+            text-align: left;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border-radius: 8px;
+            background: white;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .ranking-item:hover {
+            background: #f8f9fa;
+            transform: translateX(5px);
+        }
+
+        .ranking-item.top3 {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            border-color: #ffc107;
+            font-weight: bold;
+        }
+
+        .ranking-item.top1 {
+            background: linear-gradient(135deg, #ffd700 0%, #ff6b6b 100%);
+            border-color: #dc3545;
+        }
+
+        .rank-number {
+            font-size: 18px;
+            font-weight: bold;
+            width: 30px;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            margin-right: 10px;
+        }
+
+        .user-stats {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .win-rate {
+            font-size: 16px;
+            font-weight: bold;
+            color: #28a745;
+            margin-left: auto;
+        }
+
+        .no-data {
+            color: #999;
+            font-style: italic;
+            padding: 40px 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="ranking-container">
+    <div class="ranking-title">🏆 群组排行榜 TOP10</div>
+
+    <div class="games-section">
+        <!-- 井字棋排行榜 -->
+        <div class="game-ranking ttt-ranking">
+            <div class="game-title">🎯 井字棋</div>
+            <div class="ranking-list">
+                {% if ttt_rankings %}
+                {% for player in ttt_rankings %}
+                <div class="ranking-item {% if player.rank <= 3 %}top3{% endif %} {% if player.rank == 1 %}top1{% endif %}">
+                    <div class="rank-number">{{ player.rank }}</div>
+                    <div class="user-info">
+                        <img alt="用户头像"
+                             class="user-avatar" src="https://q.qlogo.cn/qqapp/{{ bot_app_id }}/{{ player.user_id }}/640">
+                        <div>
+                            <div class="user-stats">{{ player.wins }}胜 {{ player.total_games }}局</div>
+                        </div>
+                    </div>
+                    <div class="win-rate">{{ player.win_rate }}%</div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="no-data">暂无排行数据</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 五子棋排行榜 -->
+        <div class="game-ranking gomoku-ranking">
+            <div class="game-title">🎲 五子棋</div>
+            <div class="ranking-list">
+                {% if gomoku_rankings %}
+                {% for player in gomoku_rankings %}
+                <div class="ranking-item {% if player.rank <= 3 %}top3{% endif %} {% if player.rank == 1 %}top1{% endif %}">
+                    <div class="rank-number">{{ player.rank }}</div>
+                    <div class="user-info">
+                        <img alt="用户头像"
+                             class="user-avatar" src="https://q.qlogo.cn/qqapp/{{ bot_app_id }}/{{ player.user_id }}/640">
+                        <div>
+                            <div class="user-stats">{{ player.wins }}胜 {{ player.total_games }}局</div>
+                        </div>
+                    </div>
+                    <div class="win-rate">{{ player.win_rate }}%</div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="no-data">暂无排行数据</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

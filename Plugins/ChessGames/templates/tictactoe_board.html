@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>井字棋棋盘</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 480px;
+        }
+
+        .title-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .game-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .title-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 3px solid #ddd;
+            position: absolute;
+        }
+
+        .title-avatar.left {
+            left: 20px;
+        }
+
+        .title-avatar.right {
+            right: 20px;
+        }
+
+        .title-avatar.current {
+            border-color: #007bff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+        }
+
+        .players-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .player {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .player-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-left: 8px;
+            border: 2px solid #ddd;
+        }
+
+        .player.current {
+            color: #007bff;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 6px;
+            margin: 20px auto;
+            background: #333;
+            border-radius: 12px;
+            padding: 8px;
+            width: fit-content;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 52px;
+            font-weight: bold;
+            cursor: pointer;
+
+            position: relative;
+            box-sizing: border-box;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .cell:hover {
+            background: #f0f0f0;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .cell.x {
+            color: #e74c3c;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .cell.o {
+            color: #3498db;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .cell.empty::after {
+            content: attr(data-position);
+            font-size: 14px;
+            color: #999;
+            position: absolute;
+            top: 5px;
+            left: 8px;
+        }
+
+
+        .game-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .status {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .status.playing {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.win {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status.draw {
+            background: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="title-section">
+        <!-- 左侧头像 (X玩家) -->
+        {% if player1_id != 'AI' %}
+        <img alt="X玩家头像"
+             class="title-avatar left {% if current_player == player1_id %}current{% endif %}"
+             src="https://q.qlogo.cn/qqapp/{{ bot_app_id }}/{{ player1_id }}/640">
+        {% endif %}
+
+        <div class="game-title">🎮 井字棋</div>
+
+        <!-- 右侧头像 (O玩家) -->
+        {% if player2_id != 'AI' %}
+        <img alt="O玩家头像"
+             class="title-avatar right {% if current_player == player2_id %}current{% endif %}"
+             src="https://q.qlogo.cn/qqapp/{{ bot_app_id }}/{{ player2_id }}/640">
+        {% endif %}
+    </div>
+
+    <div class="players-info">
+        <div class="player {% if current_player == player1_id %}current{% endif %}">
+            <span>❌ {% if player1_id == 'AI' %}AI{% else %}玩家{% endif %}</span>
+        </div>
+        <div class="player {% if current_player == player2_id %}current{% endif %}">
+            <span>⭕ {% if player2_id == 'AI' %}AI{% else %}玩家{% endif %}</span>
+        </div>
+    </div>
+
+    <div class="board" style="position: relative;">
+        {% for i in range(3) %}
+        {% for j in range(3) %}
+        {% set cell_value = board[i][j] %}
+        {% set position = i * 3 + j + 1 %}
+        <div class="cell
+                        {% if cell_value == 1 %}x
+                        {% elif cell_value == 2 %}o
+                        {% else %}empty{% endif %}"
+             data-position="{{ position }}">
+            {% if cell_value == 1 %}❌
+            {% elif cell_value == 2 %}⭕
+            {% endif %}
+        </div>
+        {% endfor %}
+        {% endfor %}
+
+
+    </div>
+
+    <div class="status {% if is_finished %}{% if winner %}win{% else %}draw{% endif %}{% else %}playing{% endif %}">
+        {% if is_finished %}
+        {% if winner %}
+        🎉 {% if winner == player1_id %}❌{% else %}⭕{% endif %} 获胜！
+        {% else %}
+        🤝 平局！
+        {% endif %}
+        {% else %}
+        🎯 轮到 {% if current_player == player1_id %}❌{% else %}⭕{% endif %} 下棋
+        {% endif %}
+    </div>
+
+    <div class="game-info">
+        <div>🎲 步数: {{ moves_count }}</div>
+        <div>⏱️ 游戏时间: {{ game_duration or '进行中' }}</div>
+        {% if not is_finished %}
+        <div>💡 使用 <code># &lt;位置&gt;</code> 命令下棋</div>
+        <div>🏳️ 使用 <code>认输</code> 命令认输</div>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>
